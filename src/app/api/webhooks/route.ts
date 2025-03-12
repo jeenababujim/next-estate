@@ -52,21 +52,22 @@ export async function POST(req: Request) {
   const eventType = evt?.type
  
 if (eventType === 'user.created'|| eventType === 'user.updated') {
-  const {first_name,last_name,image_url} = evt?.data 
+  console.log('user created or updated:', id);
+  const {first_name,last_name,image_url,email_addresses} = evt?.data 
   try{
    
     const user = await createOrUpdateUser(
-      id,
-      first_name,
-      last_name,
-      image_url,
-      //email_addresses
+      id || '',
+      first_name || '',
+      last_name || '',
+      image_url || '',
+      email_addresses
     )
   
-    if(user && eventType === 'user.created'){
+    if(user && eventType === 'user.created' || eventType === 'user.updated'){
           try{
             const client = await clerkClient()
-            await client.users.updateUserMetadata(id, {
+            await client.users.updateUserMetadata(id || '', {
               publicMetadata: {
                 userMongoId: user._id,
               },
@@ -83,9 +84,7 @@ if (eventType === 'user.created'|| eventType === 'user.updated') {
 
 }
 
-// if (evt.type === 'user.updated') {
-// console.log('user updated:');
-// }
+
 if(id){
 if (eventType === 'user.deleted') {
   console.log('user deleted:', id);

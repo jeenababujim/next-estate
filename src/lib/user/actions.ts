@@ -6,7 +6,7 @@ export const createOrUpdateUser = async(
   first_name: string,
   last_name: string,
   image_url: string,
-  //email_addresses: { email_address: string }[]
+  email_addresses: { email_address: string }[]
     
 )=>{
     
@@ -19,7 +19,7 @@ export const createOrUpdateUser = async(
                 firstName:first_name,
                 lastName:last_name,
                 profilePicture:image_url,
-                //email:email_addresses[0].email_address,
+                email:email_addresses[0].email_address,
             }
             },
             { upsert: true, new: true }
