@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Webhook } from 'svix'
 import { headers } from 'next/headers'
-import { WebhookEvent } from '@clerk/nextjs/server'
+import {  WebhookEvent } from '@clerk/nextjs/server'
+import { createOrUpdateUser } from '@/lib/user/actions'
+import { clerkClient } from '@clerk/nextjs/server';
 
 export async function POST(req: Request) {
   const SIGNING_SECRET = process.env.SIGNING_SECRET
@@ -46,22 +48,61 @@ export async function POST(req: Request) {
     })
   }
 
-  // Do something with payload
-  // For this guide, log payload to console
-  const { id } = evt.data
-  const eventType = evt.type
+  const { id } = evt?.data 
+  const eventType = evt?.type
+ 
+if (eventType === 'user.created'|| eventType === 'user.updated') {
+  const {first_name,last_name,image_url,email_addresses} = evt?.data 
+  try{
+   
+    const user = await createOrUpdateUser(
+      id || '',
+      first_name || '',
+      last_name || '',
+      image_url || '',
+      email_addresses
+    )
+  
+    if(user && eventType === 'user.created'){
+          try{
+            const client = await clerkClient()
+            await client.users.updateUserMetadata(id || '', {
+              publicMetadata: {
+                userMongoId: user._id,
+              },
+            })
+         
 
-if (evt.type === 'user.created') {
-console.log('user created:');
+          }catch(error){
+            console.error('Error: Failed to create user', error);
+          }
+    }
+  }catch(error) {
+    console.error('Error: Failed to create user', error);
+  }
+
 }
 
-if (evt.type === 'user.updated') {
-console.log('user updated:');
+// if (evt.type === 'user.updated') {
+// console.log('user updated:');
+// }
+if(id){
+if (eventType === 'user.deleted') {
+  console.log('user deleted:', id);
+  try{
+    const client = await clerkClient()
+    await client.users.deleteUser(id)
+  }catch(error){
+    console.error('Error: Failed to delete user', error);
+  }
 }
 
-if (evt.type === 'user.deleted') {
-console.log('user deleted:');
 }
 
   return new Response('Webhook received', { status: 200 })
 }
+
+
+
+
+
