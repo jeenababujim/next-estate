@@ -52,52 +52,53 @@ export async function POST(req: Request) {
   const eventType = evt?.type
  
 if (eventType === 'user.created'|| eventType === 'user.updated') {
-  const {first_name,last_name,image_url,email_addresses} = evt?.data 
-  try{
+  console.log('user created or updated:', id);
+  // const {first_name,last_name,image_url,email_addresses} = evt?.data 
+  // try{
    
-    const user = await createOrUpdateUser(
-      id || '',
-      first_name || '',
-      last_name || '',
-      image_url || '',
-      email_addresses
-    )
+  //   const user = await createOrUpdateUser(
+  //     id || '',
+  //     first_name || '',
+  //     last_name || '',
+  //     image_url || '',
+  //     email_addresses
+  //   )
   
-    if(user && eventType === 'user.created'){
-          try{
-            const client = await clerkClient()
-            await client.users.updateUserMetadata(id || '', {
-              publicMetadata: {
-                userMongoId: user._id,
-              },
-            })
+  //   if(user && eventType === 'user.created'){
+  //         try{
+  //           const client = await clerkClient()
+  //           await client.users.updateUserMetadata(id || '', {
+  //             publicMetadata: {
+  //               userMongoId: user._id,
+  //             },
+  //           })
          
 
-          }catch(error){
-            console.error('Error: Failed to create user', error);
-          }
-    }
-  }catch(error) {
-    console.error('Error: Failed to create user', error);
-  }
+  //         }catch(error){
+  //           console.error('Error: Failed to create user', error);
+  //         }
+  //   }
+  // }catch(error) {
+  //   console.error('Error: Failed to create user', error);
+  // }
 
 }
 
 // if (evt.type === 'user.updated') {
 // console.log('user updated:');
 // }
-if(id){
-if (eventType === 'user.deleted') {
-  console.log('user deleted:', id);
-  try{
-    const client = await clerkClient()
-    await client.users.deleteUser(id)
-  }catch(error){
-    console.error('Error: Failed to delete user', error);
-  }
-}
+// if(id){
+// if (eventType === 'user.deleted') {
+//   console.log('user deleted:', id);
+//   try{
+//     const client = await clerkClient()
+//     await client.users.deleteUser(id)
+//   }catch(error){
+//     console.error('Error: Failed to delete user', error);
+//   }
+// }
 
-}
+// }
 
   return new Response('Webhook received', { status: 200 })
 }
