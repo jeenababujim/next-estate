@@ -17,9 +17,11 @@ export const connect = async () => {
             dbName: "next-estate",
         });
 
-        console.log(" Connected to MongoDB");
+        mongoose.connection.on("connected", () => console.log(" MongoDB connected successfully"));
+       
     } catch (error) {
         console.error(" Error connecting to MongoDB:", error);
+        mongoose.connection.on("error", (err) => console.error(" MongoDB connection error:", err));
         throw error;
     }
 };

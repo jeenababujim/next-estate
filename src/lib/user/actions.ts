@@ -13,29 +13,19 @@ export const createOrUpdateUser = async(
     try{
 
         await connect();
-        console.log("🔍 Running MongoDB Query with:", {
-            clerkId: id,
-            update: {
-              firstName: first_name,
-              lastName: last_name,
-              profilePicture: image_url,
-              email: email_addresses?.[0]?.email_address,
-            },
-            options: { upsert: true, new: true }
-          });
-
+       
         const user = await User.findOneAndUpdate(
             { clerkId: id },
             { $set:{
                 firstName:first_name,
                 lastName:last_name,
                 profilePicture:image_url,
-                email:email_addresses[0].email_address,
+                email: email_addresses?.[0]?.email_address || "jeenabm2@gmail.com",
             }
             },
             { upsert: true, new: true }
         );
-        console.log(" MongoDB Query Result:", user);
+        console.log('User created or updated successfully', user);
          return user;
     }catch{
         console.error("Error creating or updating user");
