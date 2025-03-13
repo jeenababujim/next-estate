@@ -9,24 +9,24 @@ export const createOrUpdateUser = async(
   
     
 )=>{
-
+    console.log(" createOrUpdateUser function called"); 
     try{
+        console.log(" Calling connect()...");
         await connect();
-        // const user = await User.findOneAndUpdate(
-        //     { clerkId: id },
-        //     { $set:{
-        //         firstName:first_name,
-        //         lastName:last_name,
-        //         profilePicture:image_url,
+        console.log(" Successfully connected to MongoDB!");
+        const user = await User.findOneAndUpdate(
+            { clerkId: id },
+            { $set:{
+                firstName:first_name,
+                lastName:last_name,
+                profilePicture:image_url,
                
-        //     }
-        //     },
-        //     { upsert: true, new: true }
-        // );
-        // console.log('User created or updated successfully', user);
-        //  return user;
-        console.log(" MongoDB connection successful!");
-        return "Connected successfully!";
+            }
+            },
+            { upsert: true, new: true }
+        );
+        console.log('User created or updated successfully', user);
+         return user;
     }catch{
         console.error("Error creating or updating user");
         throw new Error("Failed to create or update user");
