@@ -9,7 +9,12 @@ export const createOrUpdateUser = async(
   
     
 )=>{
-    console.log(" createOrUpdateUser function called"); 
+    const isConnected = await connect();
+    if (!isConnected) {
+        console.error("Failed to connect to MongoDB");
+        throw new Error("Database connection failed");
+    }
+
     try{
         console.log(" Calling connect()...");
         await connect();

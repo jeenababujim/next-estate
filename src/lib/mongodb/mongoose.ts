@@ -1,28 +1,26 @@
-
 import mongoose from "mongoose";
 
-export const connect = async () => {
+export const connect = async (): Promise<boolean> => {
     mongoose.set("strictQuery", true);
 
-    if (mongoose.connection.readyState === 1) {
-        console.log(" MongoDB is already connected");
-        return;
+    if (mongoose.connection.readyState >= 1) {
+        console.log("MongoDB is already connected");
+        return true;
     }
 
     if (!process.env.MONGODB_URI) {
-        throw new Error(" Error: MONGODB_URI is not defined in .env file");
+        console.error("Error: MONGODB_URI is not defined in .env file");
+        return false;
     }
 
     try {
         await mongoose.connect(process.env.MONGODB_URI, {
             dbName: "next-estate",
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        } as mongoose.ConnectOptions);
-
-        console.log(" MongoDB connected successfully");
+        });
+        console.log("MongoDB connected successfully");
+        return true;
     } catch (error) {
-        console.error(" Error connecting to MongoDB:", error);
-        throw error;
+        console.error("Error connecting to MongoDB:", error);
+        return false;
     }
 };
