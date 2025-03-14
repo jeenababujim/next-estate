@@ -1,12 +1,47 @@
-import React from 'react'
+'use client'
+import React, { useState } from 'react'
 
 export default function CreateListing() {
+    const [file, setFile] = useState<File | null>(null);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        
+        if (!file) {
+            alert("Please select a file to upload.");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/fileupload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error(`Upload failed: ${response.statusText}`);
+            }
+
+            const result = await response.json();
+            console.log('File uploaded successfully:', result);
+            alert("File uploaded successfully!");
+
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert("File upload failed. Please try again.");
+        }
+    };
+
+
     return (
         <main className='p-3 max-w-6xl m-auto  bg-[#e2e8f0] mt-6'>
             <h1 className='text-3xl font-semibold text-center my-7'>
                 Crete a Listing
             </h1>
-            <form className='flex flex-col sm:flex-row gap-4'>
+            <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-4'>
                 <div className='flex flex-col gap-4 flex-1'>
                     <input
                         type='text'
@@ -15,14 +50,14 @@ export default function CreateListing() {
                         id='name'
                         maxLength={62}
                         minLength={10}
-                        required
+                        // required
                     />
                     <textarea
                         rows={4}
                         placeholder='Description'
                         className='border p-3 rounded-lg'
                         id='description'
-                        required
+                        // required
                     />
                     <input
                         type='text'
@@ -31,7 +66,7 @@ export default function CreateListing() {
                         id='address'
                         maxLength={62}
                         minLength={10}
-                        required
+                        // required
                     />
                     <div className='flex gap-6 flex-wrap'>
                         <div className='flex- gap-2 '>
@@ -83,7 +118,7 @@ export default function CreateListing() {
                                 id='bedrooms'
                                 min='1'
                                 max='10'
-                                required
+                                // required
                                 className='border p-3 border-gray-300 rounded-lg'
                             />
                             <p>Beds</p>
@@ -95,7 +130,7 @@ export default function CreateListing() {
                                 id='bathrooms'
                                 min='1'
                                 max='10'
-                                required
+                                // required
                                 className='border p-3 border-gray-300 rounded-lg'
                             />
                             <p>Baths</p>
@@ -108,7 +143,7 @@ export default function CreateListing() {
                                 id='regularPrice'
                                 min='1'
                                 max='10'
-                                required
+                                // required
                                 className='border p-3 border-gray-300 rounded-lg'
                             />
                             <div className='flex flex-col items-center'>
@@ -123,7 +158,7 @@ export default function CreateListing() {
                                 id='discountPrice'
                                 min='1'
                                 max='10'
-                                required
+                                //required
                                 className='border p-3 border-gray-300 rounded-lg'
                             />
                             <div className='flex flex-col items-center'>
@@ -145,11 +180,13 @@ export default function CreateListing() {
                     <input
                     className='p-3 border border-gray-300 rounded w-full'
                       type='file'
-                      id='images'
+                    //   id='files'
                       accept='image/*'
-                      multiple
+                      required
+                      //multiple
+                      onChange={(e) => setFile(e.target.files?.[0] || null)}
                     />
-                    <button className='p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg
+                    <button type='submit' className='p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg
                     disabled:opacity-80'>
                     Upload
                     </button>
