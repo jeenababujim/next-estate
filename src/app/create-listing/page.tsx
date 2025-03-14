@@ -1,8 +1,9 @@
 'use client'
 import React, { useState } from 'react'
-
+import  Image  from 'next/image';
 export default function CreateListing() {
     const [file, setFile] = useState<File | null>(null);
+    const[preview,setPreview] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,6 +27,8 @@ export default function CreateListing() {
             }
 
             const result = await response.json();
+            setPreview(result.url);
+            console.log(result);
             console.log('File uploaded successfully:', result);
             alert("File uploaded successfully!");
 
@@ -186,6 +189,17 @@ export default function CreateListing() {
                       //multiple
                       onChange={(e) => setFile(e.target.files?.[0] || null)}
                     />
+                    {preview && (
+                        <div>
+                          <Image src={preview} alt="Uploaded Image" width={200} height={200} />
+                        </div>
+                   
+                    )}
+                    
+
+
+                    
+
                     <button type='submit' className='p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg
                     disabled:opacity-80'>
                     Upload
