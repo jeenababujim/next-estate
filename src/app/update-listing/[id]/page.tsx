@@ -1,24 +1,95 @@
 
 
 'use client';
-import React, {  useState } from 'react';
+import React, {  useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useFormState } from '@/store/useFormState';
-import FormManager from '../components/formanager';
+import FormManager from '../../components/formanager';
 import { useUser } from '@clerk/nextjs';
-import { useRouter } from 'next/navigation';
+import { useRouter,usePathname } from 'next/navigation';
 
-
-
-export default function CreateListing() {
+export default function UpdateListing() {
     const {isSignedIn, isLoaded,user}=useUser();
     const { formData, setFormData, addFiles } = useFormState();
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const pathname=usePathname();
+    const listingId=pathname.split('/').pop();
+    console.log(listingId)
     const router = useRouter();
     const [loadingListing, setLoadingListing] = useState(false);
-   
-    // const fileInputRef = useRef<HTMLInputElement | null>(null);
     const allowedFormats = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif'];
+
+// useEffect(() =>{
+// const fetchListing=async()=>{
+//     const res=await fetch('/api/listing/get',{
+//         method: 'GET',
+//         headers: { 'Content-Type': 'application/json' },
+//         body: JSON.stringify({ id: listingId }),
+//     });
+//     const data=await res.json();
+//     if(data.success===false){
+//         router.push('/404');
+//         console.log(data.message);
+//         return;
+//     }
+//     const listing = data[0];
+//     if (listing) {
+//         // Update each field in Zustand store
+//         Object.entries(listing).forEach(([key, value]) => {
+//             setFormData(key, value);
+//         });
+//     }
+// }
+// },[])
+
+useEffect(() => {
+    const fetchListing = async () => {
+        try {
+            const res = await fetch('/api/listing/get', {
+                method: 'POST', // Ensure this matches your API method
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: listingId }),
+            });
+
+            const data = await res.json();
+
+            if (data.success === false) {
+                router.push('/404');
+                console.error(data.message);
+                return;
+            }
+
+            const listing = data[0]; // Assuming the response is an array
+console.log(data[0])
+if (listing) {
+    // Mapping API response to Zustand state
+    setFormData('name', listing.name);
+    setFormData('description', listing.description);
+    setFormData('address', listing.address);
+    setFormData('bedrooms', listing.bedrooms);
+    setFormData('bathrooms', listing.bathrooms);
+    setFormData('regularPrice', listing.regularPrice);
+    setFormData('discountPrice', listing.discountedPrice); // Fix naming issue
+    setFormData('type', listing.type);
+    setFormData('parking', listing.parking);
+    setFormData('furnished', listing.furnished);
+    setFormData('offer', listing.offer === "true"); // Convert string to boolean
+
+    // Handle image previews
+    if (listing.imageUrls && Array.isArray(listing.imageUrls)) {
+        setFormData('previews', listing.imageUrls);
+        setFormData('uploadedFileUrl', listing.imageUrls); // Assign imageUrls to previews
+    }
+  }
+        } catch (error) {
+            console.error('Error fetching listing:', error);
+        }
+    };
+
+    if (listingId) {
+        fetchListing();
+    }
+}, [listingId, setFormData, router]);
    
     const validateForm = () => {
         const validationErrors: Record<string, string> = {};
@@ -42,7 +113,7 @@ export default function CreateListing() {
         const isCheckboxChecked = formData.type|| formData.parking || formData.furnished || formData.offer;
         if (!isCheckboxChecked) validationErrors.checkboxes = "At least one option must be selected.";
 
-        if (formData.files.length === 0) validationErrors.files = "At least one image is required.";
+        if ( formData.uploadedFileUrl.length === 0) validationErrors.files = "At least one image is required.";
 
         setErrors(validationErrors);
         return Object.keys(validationErrors).length === 0;
@@ -91,34 +162,98 @@ export default function CreateListing() {
         setErrors((prevErrors) => ({ ...prevErrors, files: "" }));
     };
 
-    const handleRemoveFile = (index: number) => {
-        if (formData.uploadedFileUrl.length === 0){
-        setFormData("files", formData.files.filter((_, i) => i !== index));
-        setFormData("previews", formData.previews.filter((_, i) => i !== index));
-         }
+    // const handleRemoveFile = (index: number) => {
+    //     if (formData.uploadedFileUrl.length === 0){
+    //     setFormData("files", formData.files.filter((_, i) => i !== index));
+    //     setFormData("previews", formData.previews.filter((_, i) => i !== index));
+    //      }
+    // };
+
+    const handleRemoveFile = async (index: number) => {
+        const fileUrl = formData.uploadedFileUrl[index];
+    console.log(fileUrl);
+        try {
+            const res = await fetch('/api/fileremove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileUrl }),
+            });
+    
+            const data = await res.json();
+    
+            if (!res.ok || data.success === false) {
+                throw new Error(data.message || "Failed to delete file");
+            }
+    
+            console.log("File deleted successfully:", fileUrl);
+    
+            // Remove from local state after successful deletion
+            setFormData("uploadedFileUrl", formData.uploadedFileUrl.filter((_, i) => i !== index));
+            setFormData("previews", formData.previews.filter((_, i) => i !== index));
+        } catch (error) {
+            console.error("Error deleting file:", error);
+        }
     };
+    
+
+
+
+
+
+    // const handleFileUpload = async () => {
+    //     if (formData.files.length === 0) {
+    //         setErrors((prevErrors) => ({ ...prevErrors, files: "Please select images before uploading." }));
+    //         return;
+    //     }
+
+    //     setFormData("loading", true);
+    //     const uploadData = new FormData();
+    //     formData.files.forEach(file => uploadData.append("files", file));
+
+    //     try {
+    //         const response = await fetch("/api/fileupload", {
+    //             method: "POST",
+    //             // headers: { 'Cache-Control': 'public, max-age=300' },
+    //             body: uploadData,
+    //         });
+
+    //         if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`);
+
+    //         const result = await response.json();
+    //         setFormData("uploadedFileUrl", [...result.uploadedFileUrl]);
+    //         setFormData("previews", [...result.uploadedFileUrl]);
+    //         alert("Files uploaded successfully!");
+    //     } catch (error) {
+    //         console.error("Error uploading files:", error);
+    //         alert("File upload failed. Please try again.");
+    //     } finally {
+    //         setFormData("loading", false);
+    //     }
+    // };
+
     const handleFileUpload = async () => {
         if (formData.files.length === 0) {
             setErrors((prevErrors) => ({ ...prevErrors, files: "Please select images before uploading." }));
             return;
         }
-
+    
         setFormData("loading", true);
         const uploadData = new FormData();
         formData.files.forEach(file => uploadData.append("files", file));
-
+    
         try {
             const response = await fetch("/api/fileupload", {
                 method: "POST",
-                // headers: { 'Cache-Control': 'public, max-age=300' },
                 body: uploadData,
             });
-
+    
             if (!response.ok) throw new Error(`Upload failed: ${response.statusText}`);
-
+    
             const result = await response.json();
-            setFormData("uploadedFileUrl", [...result.uploadedFileUrl]);
-            setFormData("previews", [...result.uploadedFileUrl]);
+    
+            setFormData("uploadedFileUrl", [...formData.uploadedFileUrl, ...result.uploadedFileUrl]);
+            setFormData("previews", [...formData.uploadedFileUrl, ...result.uploadedFileUrl]);
+    
             alert("Files uploaded successfully!");
         } catch (error) {
             console.error("Error uploading files:", error);
@@ -127,6 +262,11 @@ export default function CreateListing() {
             setFormData("loading", false);
         }
     };
+    
+
+
+
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try{
@@ -141,14 +281,15 @@ export default function CreateListing() {
             return;
         }
         setLoadingListing(true);
-        const res = await fetch('/api/listing/create', {
+        const res = await fetch('/api/listing/update', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 ...formData,
-                userMongoId: user?.id
+                userMongoId: user?.id,
+                listingId: listingId,
             })
         });
             const data= await res.json();
@@ -183,17 +324,10 @@ export default function CreateListing() {
     return (
         <FormManager>
             <main className="p-3 max-w-6xl m-auto bg-[#e2e8f0] mt-6">
-          <h1 className="text-lg  font-bold text-center">
-            Create  Listing
-            </h1>  
-
-
-
-{/* <h1 className={`${inter.className} text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-center`}>
-  Create Listing
-</h1> */}
-
-               {/* <p className='text-center'>Create  Listing</p> */}
+            <h1 className="text-lg  font-bold text-center">
+            Update  Listing
+            </h1>
+                {/* <p className=' text-center'>Update  Listing</p> */}
                 <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-4">
                 {/* <h1 className="text-xl font-semibold text-center">Create a Listing</h1> */}
                     <div className="flex flex-col gap-4 flex-1">
@@ -279,7 +413,7 @@ export default function CreateListing() {
                             className="p-3 border border-gray-300 rounded w-full" onChange={handleFileChange} />
                        
 
-                        <button type="button" onClick={handleFileUpload} disabled={formData.loading || formData.uploadedFileUrl.length>0}
+                        <button type="button" onClick={handleFileUpload} disabled={formData.loading}
                             className="p-3 text-green-700 border border-green-700 rounded uppercase hover:shadow-lg disabled:opacity-50">
                             {formData.loading ? "Uploading..." : "Upload"}
                         </button>
@@ -303,7 +437,7 @@ export default function CreateListing() {
                                 placeholder='blur'
                             />
 
-                        {(formData.uploadedFileUrl.length === 0) && (
+                        {/* {(formData.uploadedFileUrl.length === 0) && ( */}
                             <button 
                                 type="button"
                                 onClick={() => handleRemoveFile(index)}
@@ -311,13 +445,12 @@ export default function CreateListing() {
                             >
                                 ❌
                             </button>
-                           
-                        ) } 
+                        {/* )} */}
                         </div>
                         ))}
                         </div>
                         <button type="submit" className="p-3 bg-slate-700 text-white rounded-lg uppercase"
-                        disabled={ formData.loading || loadingListing }>{loadingListing?'Creating..':'Create Listing'} </button>
+                        disabled={ formData.loading || loadingListing }>{loadingListing?'Updating..':'Update Listing'} </button>
                         
                         <div className='flex flex-wrap flex-1'>
                             {errors.common && <p className="text-red-500 text-sm">{errors.common}</p>}
