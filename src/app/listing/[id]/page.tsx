@@ -6,8 +6,8 @@ import Image from 'next/image';
 export default async function Listing({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params; // Ensure params is awaited
   const listingId = resolvedParams.id;
-return(
-    <div>test</div>
+console.log(`Listing ${listingId}`);
+    
 //   let listing = null;
 //     try {
 //       const result = await fetch(process.env.URL+'/api/listing/get', {
@@ -36,24 +36,25 @@ return(
 //     );
 //   }
 
-//   return (
-//     <main className="p-3 max-w-6xl mx-auto">
-//       <div className="relative w-full h-96">
-//         {listing.imageUrls && (
-//           <Image
-//             src={Array.isArray(listing.imageUrls) ? listing.imageUrls[0] : listing.imageUrls}
-//             alt={listing.name || "Listing image"}
-//             fill
-//             objectFit="cover"
-//             quality={75}
-//             loading="lazy"
-//             blurDataURL={Array.isArray(listing.imageUrls) ? listing.imageUrls[0] : listing.imageUrls}
-//             placeholder="blur"
-//             className="rounded-lg"
-//           />
-//         )}
-//       </div>
-//       <h1 className="text-2xl font-bold mt-4">{listing.name || "No Title"}</h1>
-//     </main>
+  return (
+    
+    <main className="p-3 max-w-6xl mx-auto">
+      <div className="relative w-full h-96">
+       
+          <Image
+            src={'test'}
+            alt={'test'}
+            fill
+            objectFit="cover"
+            quality={75}
+            loading="lazy"
+            blurDataURL={'test'}
+            placeholder="blur"
+            className="rounded-lg"
+          />
+      
+      </div>
+      <h1 className="text-2xl font-bold mt-4">{ "No Title"}</h1>
+    </main>
   );
 }
