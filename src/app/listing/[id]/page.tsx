@@ -1,20 +1,19 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import React from 'react'
+//import { FaBath, FaBed, FaChair, FaMapMarkerAlt, FaParking } from 'react-icons/fa';
 import Image from 'next/image';
 
-export default async function Listing({ params }: { params: { id: string } }) {
-  const listingId = params.id; // Directly extract the 'id' from URL params
+export default async function Listing({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params; // Ensure params is awaited
+  const listingId = resolvedParams.id;
 
   let listing = null;
-  try {
-    const baseURL = process.env.NEXT_PUBLIC_URL ; // Use env variable or fallback
-
-    const result = await fetch(`${baseURL}/api/listing/get`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ listingId }),
-      cache: 'no-store',
-    });
+    try {
+      const result = await fetch(process.env.URL+'/api/listing/get', {
+        method: 'POST',
+        body: JSON.stringify({ listingId}),
+        cache: 'no-store',
+      });
 
     if (!result.ok) throw new Error("Failed to fetch listing");
 
@@ -23,7 +22,7 @@ export default async function Listing({ params }: { params: { id: string } }) {
 
   } catch (err) {
     listing = { title: 'failed to load listing' };
-    console.error("Fetch error:", (err as Error).message);
+    console.error((err as Error).message);
   }
 
   if (!listing || listing.title === 'failed to load listing') {
