@@ -7,7 +7,7 @@ export default async function Listing({ params }: { params: { id: string } }) {
 
   let listing = null;
   try {
-    const baseURL = process.env.NEXT_PUBLIC_URL || "https://next-estate-pi.vercel.app"; // Use env variable or fallback
+    const baseURL = process.env.NEXT_PUBLIC_URL ; // Use env variable or fallback
 
     const result = await fetch(`${baseURL}/api/listing/get`, {
       method: 'POST',
