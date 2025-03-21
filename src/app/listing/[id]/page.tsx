@@ -3,11 +3,9 @@
 import React from 'react';
 import Image from 'next/image';
 
-interface ListingProps {
-  params: { id: string };
-}
 
-export default async function Listing({ params }: ListingProps) {
+
+export default async function Listing({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = await params; // Ensure params is awaited
     const listingId = resolvedParams.id;
   //const listingId = decodeURIComponent(params.id); // Ensure it's properly decoded
