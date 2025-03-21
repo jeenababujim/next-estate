@@ -33,9 +33,9 @@ export default async function Listing({ params }: { params: Promise<{ id: string
        console.log(`API request failed: ${response.status}`);
     }
 console.log(response);
-    // const data = await response.json();
-    // console.log(data);
-    // listing = data?.[0] || null;
+    const data = await response.json();
+    console.log(data);
+    listing = data?.[0] || null;
   } catch (err) {
     console.error('Error fetching listing:', err);
     listing = { title: 'Failed to load listing' };
