@@ -14,7 +14,7 @@ export default async function Listing({ params }: ListingProps) {
   console.log(`Fetching listing with ID: ${listingId}`);
 
   // Ensure we have a valid API URL
-  const baseUrl = process.env.NEXT_PUBLIC_URL || process.env.URL || 'http://localhost:3000';
+  const baseUrl =  process.env.URL || 'http://localhost:3000';
   const apiUrl = `${baseUrl}/api/listing/get`;
 
   let listing = null;
