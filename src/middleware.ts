@@ -5,12 +5,15 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
  '/api/webhooks(.*)',
  '/api/fileupload(.*)',
+ '/api/listing(.*)',
+ '/api/fileremove(.*)',
 ])
 
 
 export default clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
     await auth.protect()
+    
   }
 })
 
@@ -22,3 +25,5 @@ export const config = {
     '/(api|trpc)(.*)',
   ],
 }
+
+

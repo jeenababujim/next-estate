@@ -32,7 +32,7 @@ export default async function Listing({ params }: { params: Promise<{ id: string
     if (!response.ok){ 
        console.log(`API request failed: ${response.status}`);
     }
-console.log(response);
+    console.log(response);
     const data = await response.json();
     console.log(data);
     listing = data?.[0] || null;
