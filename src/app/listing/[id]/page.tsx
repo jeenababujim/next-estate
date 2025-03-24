@@ -13,7 +13,7 @@ export default async function Listing({ params }: { params: Promise<{ id: string
   console.log(`Fetching listing with ID: ${listingId}`);
 
   // Ensure we have a valid API URL
-  const baseUrl =  process.env.URL || 'http://localhost:3000';
+  const baseUrl =  process.env.URL;
   const apiUrl = `${baseUrl}/api/listing/get`;
 
   let listing = null;
